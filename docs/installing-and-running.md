@@ -1,219 +1,134 @@
-# Installation
+# Cài đặt và Khởi chạy (Installing & Running)
 
-NestJS Boilerplate supports [TypeORM](https://www.npmjs.com/package/typeorm) and [Mongoose](https://www.npmjs.com/package/mongoose) for working with databases. By default, TypeORM uses [PostgreSQL](https://www.postgresql.org/) as the main database, but you can use any relational database.
-
-Switching between TypeORM and Mongoose is implemented based on the [Hexagonal Architecture](architecture.md#hexagonal-architecture). This makes it easy to choose the right database for your application.
+Tài liệu hướng dẫn các bước thiết lập dự án nhanh gọn nhất dành cho lập trình viên khi lần đầu clone repository về máy.
 
 ---
 
-## Table of Contents <!-- omit in toc -->
+## 1. Yêu cầu môi trường (Prerequisites)
 
-- [Comfortable development (PostgreSQL + TypeORM)](#comfortable-development-postgresql--typeorm)
-  - [Video guideline (PostgreSQL + TypeORM)](#video-guideline-postgresql--typeorm)
-- [Comfortable development (MongoDB + Mongoose)](#comfortable-development-mongodb--mongoose)
-- [Quick run (PostgreSQL + TypeORM)](#quick-run-postgresql--typeorm)
-- [Quick run (MongoDB + Mongoose)](#quick-run-mongodb--mongoose)
-- [Links](#links)
+- **Node.js**: >= 20.x (khuyến nghị dùng Node.js LTS theo `.nvmrc`)
+- **npm**: >= 10.x
+- **Docker & Docker Compose**: Để chạy MongoDB, Mongo-Express và Maildev.
 
 ---
 
-## Comfortable development (PostgreSQL + TypeORM)
+## 2. Các bước cài đặt (Quick Setup)
 
-1. Clone repository
+### Bước 1: Clone repository & Cài đặt dependencies
 
-   ```bash
-   git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
-   ```
+```bash
+git clone https://github.com/Han3107/score-up-toeic-be.git
+cd score-up-toeic-be
+npm install
+```
 
-1. Go to folder, and copy `env-example-relational` as `.env`.
+### Bước 2: Thiết lập biến môi trường (.env)
 
-   ```bash
-   cd my-app/
-   cp env-example-relational .env
-   ```
+Copy file cấu hình mẫu dành cho MongoDB:
 
-1. Change `DATABASE_HOST=postgres` to `DATABASE_HOST=localhost`
+```bash
+cp env-example-document .env
+```
 
-   Change `MAIL_HOST=maildev` to `MAIL_HOST=localhost`
+> [!IMPORTANT]
+> **Khi chạy ứng dụng trực tiếp trên máy (Local Dev với `npm run start:dev`):**  
+> Mở file `.env` và kiểm tra đảm bảo `DATABASE_URL` trỏ về `localhost`:
+>
+> ```env
+> DATABASE_URL=mongodb://localhost:27017
+> ```
+>
+> _(Chỉ dùng `DATABASE_URL=mongodb://mongo:27017` khi chạy cả ứng dụng NestJS bên trong container Docker)_.
 
-1. Run additional container:
+### Bước 3: Khởi động Database & Dịch vụ phụ trợ
 
-   ```bash
-   docker compose up -d postgres adminer maildev
-   ```
+Khởi chạy container MongoDB, Mongo-Express (Web GUI) và Maildev:
 
-1. Install dependency
+```bash
+docker compose -f docker-compose.document.yaml up -d mongo mongo-express maildev
+```
 
-   ```bash
-   npm install
-   ```
+Kiểm tra trạng thái container:
 
-1. Run app configuration
+```bash
+docker ps
+```
 
-   > You should run this command only the first time on initialization of your project, all next time skip it.
+### Bước 4: Khởi tạo dữ liệu mẫu (Seed Data)
 
-   > If you want to contribute to the boilerplate, you should NOT run this command.
+Chạy script seed để tạo dữ liệu mặc định (tài khoản Admin, User mẫu, Roles, Statuses):
 
-   ```bash
-   npm run app:config
-   ```
+```bash
+npm run seed:run:document
+```
 
-1. Run migrations
+### Bước 5: Khởi chạy ứng dụng (Development Mode)
 
-   ```bash
-   npm run migration:run
-   ```
-
-1. Run seeds
-
-   ```bash
-   npm run seed:run:relational
-   ```
-
-1. Run app in dev mode
-
-   ```bash
-   npm run start:dev
-   ```
-
-1. Open <http://localhost:3001>
-
-### Video guideline (PostgreSQL + TypeORM)
-
-<https://github.com/user-attachments/assets/136a16aa-f94a-4b20-8eaf-6b4262964315>
+```bash
+npm run start:dev
+```
 
 ---
 
-## Comfortable development (MongoDB + Mongoose)
+## 3. Các đường dẫn dịch vụ (Useful Links)
 
-1. Clone repository
-
-   ```bash
-   git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
-   ```
-
-1. Go to folder, and copy `env-example-document` as `.env`.
-
-   ```bash
-   cd my-app/
-   cp env-example-document .env
-   ```
-
-1. Change `DATABASE_URL=mongodb://mongo:27017` to `DATABASE_URL=mongodb://localhost:27017`
-
-1. Run additional container:
-
-   ```bash
-   docker compose -f docker-compose.document.yaml up -d mongo mongo-express maildev
-   ```
-
-1. Install dependency
-
-   ```bash
-   npm install
-   ```
-
-1. Run app configuration
-
-   > You should run this command only the first time on initialization of your project, all next time skip it.
-
-   > If you want to contribute to the boilerplate, you should NOT run this command.
-
-   ```bash
-   npm run app:config
-   ```
-
-1. Run seeds
-
-   ```bash
-   npm run seed:run:document
-   ```
-
-1. Run app in dev mode
-
-   ```bash
-   npm run start:dev
-   ```
-
-1. Open <http://localhost:3001>
+| Dịch vụ                     | URL                          | Thông tin đăng nhập mặc định          |
+| :-------------------------- | :--------------------------- | :------------------------------------ |
+| **Backend API**             | <http://localhost:3001>      | -                                     |
+| **Swagger Docs**            | <http://localhost:3001/docs> | -                                     |
+| **Mongo-Express (Web GUI)** | <http://localhost:8081>      | Username: `root` / Password: `secret` |
+| **Maildev (Test Email)**    | <http://localhost:1080>      | -                                     |
 
 ---
 
-## Quick run (PostgreSQL + TypeORM)
+## 4. Kết nối Database bằng MongoDB Compass
 
-If you want quick run your app, you can use following commands:
+Để kết nối và quản lý dữ liệu trực quan bằng **MongoDB Compass**:
 
-1. Clone repository
+### Cách 1: Dùng Connection String (Nhanh nhất)
 
-   ```bash
-   git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
-   ```
+Dán chuỗi URL sau vào ô **URI / New Connection** trong Compass rồi nhấn **Connect**:
 
-1. Go to folder, and copy `env-example-relational` as `.env`.
+```text
+mongodb://root:secret@localhost:27017/?authSource=admin
+```
 
-   ```bash
-   cd my-app/
-   cp env-example-relational .env
-   ```
+### Cách 2: Điền thủ công (Advanced Connection Options)
 
-1. Run containers
-
-   ```bash
-   docker compose up -d
-   ```
-
-1. For check status run
-
-   ```bash
-   docker compose logs
-   ```
-
-1. Open <http://localhost:3001>
+- **Host**: `localhost` (hoặc `127.0.0.1`)
+- **Port**: `27017`
+- **Authentication**: Chọn `Username / Password`
+  - **Username**: `root`
+  - **Password**: `secret`
+  - **Authentication Database**: `admin` _(Bắt buộc điền mục này để xác thực tài khoản root)_
 
 ---
 
-## Quick run (MongoDB + Mongoose)
+## 5. Tài khoản mặc định sau khi Seed
 
-If you want quick run your app, you can use following commands:
-
-1. Clone repository
-
-   ```bash
-   git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
-   ```
-
-1. Go to folder, and copy `env-example-document` as `.env`.
-
-   ```bash
-   cd my-app/
-   cp env-example-document .env
-   ```
-
-1. Run containers
-
-   ```bash
-   docker compose -f docker-compose.document.yaml up -d
-   ```
-
-1. For check status run
-
-   ```bash
-   docker compose -f docker-compose.document.yaml logs
-   ```
-
-1. Open <http://localhost:3001>
+- **Super Admin**:
+  - Email: `admin@example.com`
+  - Password: `secret`
+- **User mẫu**:
+  - Email: `john.doe@example.com`
+  - Password: `secret`
 
 ---
 
-## Links
+## 6. Chạy toàn bộ hệ thống bằng Docker (Tùy chọn)
 
-- Swagger (API docs): <http://localhost:3001/docs>
-- Adminer (client for DB): <http://localhost:8080>
-- MongoDB Express (client for DB): <http://localhost:8081/>
-- Maildev: <http://localhost:1080>
+Nếu bạn muốn chạy toàn bộ ứng dụng (bao gồm cả NestJS backend) bằng Docker:
 
----
+```bash
+# 1. Chuẩn bị file .env (giữ nguyên DATABASE_URL=mongodb://mongo:27017)
+cp env-example-document .env
 
-Previous: [Introduction](introduction.md)
+# 2. Build và khởi chạy tất cả services
+docker compose -f docker-compose.document.yaml up -d --build
 
-Next: [Architecture](architecture.md)
+# 3. Chạy seed dữ liệu bên trong container
+docker compose -f docker-compose.document.yaml exec api npm run seed:run:document
+
+# 4. Xem logs của ứng dụng
+docker compose -f docker-compose.document.yaml logs -f api
+```
