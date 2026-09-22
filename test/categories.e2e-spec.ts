@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { CategoriesModule } from '../src/categories/categories.module';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../src/roles/roles.guard';
@@ -11,19 +11,24 @@ import { CategorySchemaClass } from '../src/categories/infrastructure/persistenc
 describe('CategoriesController (e2e)', () => {
   let app: INestApplication;
 
-  // Mock Mongoose Model
-  const mockCategoryModel = {
-    find: jest.fn().mockReturnThis(),
-    sort: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockResolvedValue([]),
-    findOne: jest.fn(),
-    findOneAndUpdate: jest.fn(),
-    deleteOne: jest.fn(),
-    save: jest.fn(),
-    select: jest.fn().mockReturnThis(),
-    exec: jest.fn(),
-  };
+  // Mock Mongoose Model properly as a class constructor
+  class MockCategoryModel {
+    constructor(private data: any) {}
+    save = jest.fn().mockResolvedValue({
+      ...this.data,
+      _id: 'mock-id-12345',
+    });
+
+    static find = jest.fn().mockReturnThis();
+    static sort = jest.fn().mockReturnThis();
+    static skip = jest.fn().mockReturnThis();
+    static limit = jest.fn().mockResolvedValue([]);
+    static findOne = jest.fn();
+    static findOneAndUpdate = jest.fn();
+    static deleteOne = jest.fn();
+    static select = jest.fn().mockReturnThis();
+    static exec = jest.fn();
+  }
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -31,7 +36,7 @@ describe('CategoriesController (e2e)', () => {
     })
       .overrideGuard(AuthGuard('jwt'))
       .useValue({
-        canActivate: (context) => {
+        canActivate: (context: any) => {
           const req = context.switchToHttp().getRequest();
           req.user = { id: 'test-user', role: { id: RoleEnum.admin } };
           return true;
@@ -42,7 +47,7 @@ describe('CategoriesController (e2e)', () => {
         canActivate: () => true,
       })
       .overrideProvider(getModelToken(CategorySchemaClass.name))
-      .useValue(mockCategoryModel)
+      .useValue(MockCategoryModel)
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -58,17 +63,17 @@ describe('CategoriesController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/categories')
       .expect(200)
-      .expect((res) => {
+      .expect((res: any) => {
         expect(res.body).toHaveProperty('data');
-        expect(res.body).toHaveProperty('meta');
+        expect(res.body).toHaveProperty('hasNextPage');
       });
   });
 
   it('should sync predefined categories (POST) /categories/sync-defaults', () => {
-    mockCategoryModel.find.mockResolvedValueOnce([]); // Nothing exists yet
-    mockCategoryModel.findOne.mockReturnValueOnce({
-      sort: jest.fn().mockReturnValueOnce({
-        select: jest.fn().mockReturnValueOnce({
+    MockCategoryModel.find.mockResolvedValueOnce([]); // Nothing exists yet
+    MockCategoryModel.findOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
           exec: jest.fn().mockResolvedValue({ sequence: 0 }),
         }),
       }),
@@ -79,12 +84,10 @@ describe('CategoriesController (e2e)', () => {
       .send({
         categories: [{ name: 'Word Form' }, { name: 'Grammar' }],
       })
-      .expect(201)
-      .expect((res) => {
+      .expect(201) // 201 is standard for POST in NestJS
+      .expect((res: any) => {
         expect(res.body.message).toBe('Sync completed successfully');
         expect(res.body.createdCount).toBe(2);
       });
   });
-
-  // More E2E scenarios can be added here matching quickstart.md
 });
