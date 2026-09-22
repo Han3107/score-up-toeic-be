@@ -1,0 +1,20 @@
+config:
+  target: "http://localhost:3000/api/v1"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 50
+      name: "Sustained Load"
+  plugins:
+    metrics-by-endpoint: {}
+  ensure:
+    p95: 1000 # SC-002: <1s for list
+scenarios:
+  - name: "Learner views categories"
+    flow:
+      - get:
+          url: "/categories?page=1&limit=10"
+          headers:
+            Authorization: "Bearer {{ $processEnvironment.LEARNER_TOKEN }}"

@@ -28,8 +28,11 @@ const infrastructureDatabaseModule = MongooseModule.forRootAsync({
   useClass: MongooseConfigService,
 });
 
+import { CategoriesModule } from './categories/categories.module';
+
 @Module({
   imports: [
+    CategoriesModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [
