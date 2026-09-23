@@ -30,8 +30,17 @@ const infrastructureDatabaseModule = MongooseModule.forRootAsync({
 
 import { CategoriesModule } from './categories/categories.module';
 
+import { ToeicTestsModule } from './toeic-tests/toeic-tests.module';
+
+import { QuestionGroupsModule } from './question-groups/question-groups.module';
+
+import { QuestionsModule } from './questions/questions.module';
+
 @Module({
   imports: [
+    QuestionsModule,
+    QuestionGroupsModule,
+    ToeicTestsModule,
     CategoriesModule,
     ConfigModule.forRoot({
       isGlobal: true,
