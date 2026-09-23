@@ -29,3 +29,7 @@ Do not edit Backlog task, draft, document, decision, or milestone markdown files
 
 </CRITICAL_INSTRUCTION>
 <!-- BACKLOG.MD GUIDELINES END -->
+
+## Git Conventions
+
+- **Commit Attribution:** Do NOT add the `Co-Authored-By: Claude Code <noreply@anthropic.com>` line to git commit messages or `🤖 Generated with Claude Code` to pull request descriptions.
