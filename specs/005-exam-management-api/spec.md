@@ -14,6 +14,9 @@
 
 - Q: Do exams need a visibility status? → A: Yes, exams must support statuses: Draft, Published, Hidden.
 - Q: Do questions require support for multimedia assets and grouping by reading passages? → A: Yes, support full TOEIC formats including audio, images, and reading passages.
+- Q: What should happen if an admin attempts to delete an exam that students have already taken? → A: Use soft delete (e.g., deleted_at timestamp) to preserve student history records.
+- Q: How should related questions (sharing a reading passage or audio) be grouped in the data model? → A: Introduce a separate QuestionGroup entity to hold shared content and link to child questions.
+- Q: How should the system handle a student requesting to start an exam with 0 questions? → A: Block the request and return an error (e.g., 400 Bad Request) to prevent starting an invalid exam.
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -51,15 +54,15 @@ Administrators need to add individual questions to an existing exam, update ques
 
 ### User Story 3 - Student browses and selects an exam (Priority: P2)
 
-Students need to view a list of available exams so they can choose which one to practice.
+Students (even unauthenticated visitors) need to view a list of available exams so they can choose which one to practice.
 
 **Why this priority**: Students must be able to discover content to engage with the platform.
 
-**Independent Test**: Can be fully tested by a student requesting the exam list and receiving a paginated list of available tests.
+**Independent Test**: Can be fully tested by requesting the exam list without logging in and receiving a paginated list of available tests.
 
 **Acceptance Scenarios**:
 
-1. **Given** a student is authenticated and exams exist in the system, **When** they view the exam list, **Then** they see a list of exams with basic metadata (title, description).
+1. **Given** exams exist in the system, **When** a user (not logged in) views the exam list, **Then** they see a list of exams with basic metadata (title, description).
 2. **Given** many exams exist, **When** a student requests the second page of exams, **Then** they receive the correct subset of exams.
 
 ---
@@ -80,16 +83,16 @@ Once a student selects an exam, they need to retrieve all the questions associat
 
 ### Edge Cases
 
-- What happens if an admin attempts to delete an exam that students have already taken? (Should it be a soft delete or cascade delete?)
-- What happens if a student requests an exam that does not exist or has been deleted? (Should return a 404 Not Found)
-- How does the system handle an exam with 0 questions being requested by a student?
+- If an admin attempts to delete an exam that students have already taken, the system MUST perform a soft delete to preserve historical student data while hiding the exam from active lists.
+- If a student requests an exam that does not exist or has been deleted, the system MUST return a 404 Not Found error.
+- If a student requests an exam that contains 0 questions, the system MUST return a 400 Bad Request error to prevent starting an empty test.
 
 ## Requirements _(mandatory)_
 
 ### Functional Requirements
 
 - **FR-001**: System MUST allow administrators to create, read, update, and delete TOEIC exams.
-- **FR-002**: System MUST allow administrators to add, read, update, and remove questions for a specific TOEIC exam.
+- **FR-002**: System MUST allow administrators to add (including bulk-add array payloads), read, update, and remove questions for a specific TOEIC exam.
 - **FR-003**: System MUST support exam visibility statuses (Draft, Published, Hidden) and ensure students can only view Published exams.
 - **FR-004**: System MUST allow students to retrieve a paginated list of available exams.
 - **FR-005**: System MUST allow students to fetch the full details of a specific exam, including all its questions.
@@ -99,7 +102,8 @@ Once a student selects an exam, they need to retrieve all the questions associat
 ### Key Entities
 
 - **Exam (ToeicTest)**: Represents a full TOEIC test containing metadata (title, description, category, status).
-- **Question**: Represents an individual test question containing the prompt, options, correct answer, and explanation.
+- **QuestionGroup**: Represents a group of related questions sharing common stimuli (e.g., reading passages, audio files, instructions).
+- **Question**: Represents an individual test question containing the prompt, options, correct answer, and explanation. Linked to a QuestionGroup or directly to the Exam.
 
 ## Success Criteria _(mandatory)_
 
