@@ -38,13 +38,29 @@ describe('CategoriesController (e2e)', () => {
       .useValue({
         canActivate: (context: any) => {
           const req = context.switchToHttp().getRequest();
-          req.user = { id: 'test-user', role: { id: RoleEnum.admin } };
-          return true;
+          if (req.headers.authorization === 'Bearer ADMIN_TOKEN') {
+            req.user = { id: 'test-admin', role: { id: RoleEnum.admin } };
+            return true;
+          }
+          return false;
+        },
+      })
+      .overrideGuard(AuthGuard(['jwt', 'anonymous']))
+      .useValue({
+        canActivate: (context: any) => {
+          const req = context.switchToHttp().getRequest();
+          if (req.headers.authorization === 'Bearer ADMIN_TOKEN') {
+            req.user = { id: 'test-admin', role: { id: RoleEnum.admin } };
+          }
+          return true; // anonymous always succeeds
         },
       })
       .overrideGuard(RolesGuard)
       .useValue({
-        canActivate: () => true,
+        canActivate: (context: any) => {
+          const req = context.switchToHttp().getRequest();
+          return req.user?.role?.id === RoleEnum.admin;
+        },
       })
       .overrideProvider(getModelToken(CategorySchemaClass.name))
       .useValue(MockCategoryModel)
@@ -62,6 +78,7 @@ describe('CategoriesController (e2e)', () => {
   it('should get all categories (GET) - Admin views all', () => {
     return request(app.getHttpServer())
       .get('/categories')
+      .set('Authorization', 'Bearer ADMIN_TOKEN')
       .expect(200)
       .expect((res: any) => {
         expect(res.body).toHaveProperty('data');
@@ -81,6 +98,7 @@ describe('CategoriesController (e2e)', () => {
 
     return request(app.getHttpServer())
       .post('/categories/sync-defaults')
+      .set('Authorization', 'Bearer ADMIN_TOKEN')
       .send({
         categories: [{ name: 'Word Form' }, { name: 'Grammar' }],
       })
@@ -89,5 +107,58 @@ describe('CategoriesController (e2e)', () => {
         expect(res.body.message).toBe('Sync completed successfully');
         expect(res.body.createdCount).toBe(2);
       });
+  });
+
+  it('should create a new category (POST) - Admin', () => {
+    MockCategoryModel.findOne
+      .mockReturnValueOnce({
+        sort: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            exec: jest.fn().mockResolvedValue({ sequence: 5 }),
+          }),
+        }),
+      }) // Max sequence is 5
+      .mockResolvedValueOnce(null); // Name doesn't exist
+
+    return request(app.getHttpServer())
+      .post('/categories')
+      .set('Authorization', 'Bearer ADMIN_TOKEN')
+      .send({
+        name: 'Listening Test',
+        status: 'HIDDEN',
+      })
+      .expect(201)
+      .expect((res: any) => {
+        expect(res.body).toHaveProperty('name', 'Listening Test');
+      });
+  });
+
+  it('should delete a category (DELETE) - Admin', () => {
+    MockCategoryModel.deleteOne.mockResolvedValueOnce({ deletedCount: 1 });
+    return request(app.getHttpServer())
+      .delete('/categories/mock-id-12345')
+      .set('Authorization', 'Bearer ADMIN_TOKEN')
+      .expect(200);
+  });
+
+  it('should get categories (GET) - Public User views only ACTIVE', () => {
+    // Note: The actual status filtering logic is tested in unit tests for the service.
+    // Here we ensure the endpoint succeeds without a token (anonymous access).
+    return request(app.getHttpServer())
+      .get('/categories?page=1&limit=5')
+      .expect(200)
+      .expect((res: any) => {
+        expect(res.body).toHaveProperty('data');
+        expect(res.body).toHaveProperty('hasNextPage');
+      });
+  });
+
+  it('should reject unauthorized access (POST) - Public User', () => {
+    return request(app.getHttpServer())
+      .post('/categories')
+      .send({
+        name: 'Hacked Category',
+      })
+      .expect(403);
   });
 });

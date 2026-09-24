@@ -36,7 +36,7 @@ This document defines the REST API endpoints for the Categories Module.
 
 ---
 
-## 2. Get Categories List (Admin & Learner)
+## 2. Get Categories List (Admin & Public)
 **GET** `/api/v1/categories`
 
 **Query Parameters:**
@@ -65,7 +65,7 @@ This document defines the REST API endpoints for the Categories Module.
   }
 }
 ```
-*(Note: For Learners, the backend implicitly filters to `status=ACTIVE` only. Admins see all.)*
+*(Note: For Public requests, the backend implicitly filters to `status=ACTIVE` only. Admins see all.)*
 
 ---
 

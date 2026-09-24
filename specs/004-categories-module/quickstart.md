@@ -4,12 +4,11 @@ This guide provides runnable validation scenarios to prove the Categories Module
 
 ## Prerequisites
 - Node.js & NestJS application running.
-- A valid Admin JWT token (`$ADMIN_TOKEN`) and Learner JWT token (`$LEARNER_TOKEN`).
+- A valid Admin JWT token (`$ADMIN_TOKEN`).
 
 ```bash
 export API_URL="http://localhost:3000/api/v1"
 export ADMIN_TOKEN="your_admin_jwt"
-export LEARNER_TOKEN="your_learner_jwt"
 ```
 
 ## Scenario 1: Sync Defaults (Admin)
@@ -62,25 +61,23 @@ curl -X DELETE "$API_URL/categories/$CAT_ID" \
 # Expected Output: 200 OK or 204 No Content (Verify it is fully removed from DB, not just soft deleted)
 ```
 
-## Scenario 3: Learner Viewing
-Verify that learners only see `ACTIVE` categories and pagination works.
+## Scenario 3: Public Viewing
+Verify that public users only see `ACTIVE` categories and pagination works.
 
 ```bash
-# Get categories as learner
-curl -X GET "$API_URL/categories?page=1&limit=5" \
-  -H "Authorization: Bearer $LEARNER_TOKEN"
+# Get categories without authentication
+curl -X GET "$API_URL/categories?page=1&limit=5"
 # Expected: Only ACTIVE categories are returned (the "Listening Test" created as HIDDEN should not appear).
 # Response should include meta data (total, page, limit, totalPages).
 ```
 
 ## Scenario 4: Unauthorized Access Protection
-Verify learners cannot call Admin endpoints.
+Verify public users cannot call Admin endpoints.
 
 ```bash
-# Attempt to create category as learner
+# Attempt to create category without authentication
 curl -X POST "$API_URL/categories" \
-  -H "Authorization: Bearer $LEARNER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "Hacked Category"}'
-# Expected: 403 Forbidden
+# Expected: 401 Unauthorized or 403 Forbidden
 ```

@@ -1,7 +1,7 @@
 # Implementation Plan: Categories Module
 
 **Feature Branch**: `004-categories-module`
-**Feature Spec**: [../spec.md](../spec.md)
+**Feature Spec**: [spec.md](spec.md)
 
 ## Technical Context
 
