@@ -1,10 +1,10 @@
 ---
 id: TASK-1
 title: TOEIC Exam Management API
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-23 07:46'
-updated_date: '2026-09-23 07:50'
+updated_date: '2026-09-24 03:35'
 labels: []
 dependencies: []
 ordinal: 1000

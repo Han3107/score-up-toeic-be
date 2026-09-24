@@ -1,12 +1,13 @@
 ---
 id: TASK-2
 title: Personal Study Management API (Folders & Modules)
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-23 07:46'
+updated_date: '2026-09-24 03:36'
 labels: []
 dependencies: []
-ordinal: 2000
+ordinal: 1000
 ---
 
 ## Description
