@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UsersModule } from './users/users.module';
 import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
@@ -36,8 +37,15 @@ import { QuestionGroupsModule } from './question-groups/question-groups.module';
 
 import { QuestionsModule } from './questions/questions.module';
 
+import { FoldersModule } from './folders/folders.module';
+
+import { VocabularyModulesModule } from './vocabulary-modules/vocabulary-modules.module';
+
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
+    VocabularyModulesModule,
+    FoldersModule,
     QuestionsModule,
     QuestionGroupsModule,
     ToeicTestsModule,

@@ -1,6 +1,6 @@
 # Feature Specification: study-folders-modules
 
-**Feature Branch**: `[###-feature-name]`
+**Feature Branch**: `006-study-folders-modules`
 
 **Created**: 2026-09-24
 
@@ -8,7 +8,7 @@
 
 **Input**: User description: "Provide APIs that allow users to create, view, update, and delete their personal study folders and vocabulary study modules."
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ## Clarifications
 
@@ -17,9 +17,6 @@
 - Q: Một học phần có thể nằm trong nhiều thư mục khác nhau cùng lúc không? → A: Không (1:N), nhưng cần có cơ chế sao chép (copy/clone) học phần từ thư mục này sang thư mục khác.
 - Q: Các từ vựng bên trong học phần có cần lưu theo thứ tự cụ thể không? → A: Không cần giữ thứ tự tuỳ chỉnh, nhưng khi học/làm bài cần có khả năng hiển thị ngẫu nhiên (random).
 - Q: Có cần thiết lập giới hạn số lượng từ vựng tối đa trong một học phần không? → A: Giới hạn tối đa 500 từ vựng mỗi học phần (Option C).
-
-
-
 
 ### User Story 1 - Manage Study Folders (Priority: P1)
 
@@ -79,8 +76,7 @@ As a user, I want to assign vocabulary modules to specific folders so that my st
 - What happens when a user attempts to add the same module to a folder multiple times? The API should handle it gracefully, either by ignoring the duplicate or returning a standard validation error.
 - What happens when a user tries to add more than 500 terms to a single module? The API should return a 400 Bad Request indicating the limit has been reached.
 
-
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -98,14 +94,13 @@ As a user, I want to assign vocabulary modules to specific folders so that my st
 - **FR-008**: System MUST support soft-deleting folders and modules, and provide a way for users to restore soft-deleted items within 15 days.
 - **FR-009**: System MUST permanently delete soft-deleted items after 15 days.
 
-### Key Entities *(include if feature involves data)*
+### Key Entities _(include if feature involves data)_
 
 - **Folder**: Represents a user's study folder. Contains attributes like ID, Title, Description, UserID (Owner), Timestamps.
 - **Vocabulary Module**: Represents a list of terms to study. Contains attributes like ID, Title, Description, UserID (Owner), FolderID (optional), Timestamps.
 - **Vocabulary Term**: Represents a single item in a module. Contains attributes like ID, Term (word), Definition, ModuleID.
 
-
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
