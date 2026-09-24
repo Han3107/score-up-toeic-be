@@ -12,9 +12,7 @@ config:
   ensure:
     p95: 1000 # SC-002: <1s for list
 scenarios:
-  - name: "Learner views categories"
+  - name: "Public user views categories"
     flow:
       - get:
           url: "/categories?page=1&limit=10"
-          headers:
-            Authorization: "Bearer {{ $processEnvironment.LEARNER_TOKEN }}"

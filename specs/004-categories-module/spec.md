@@ -13,7 +13,7 @@
 ### Session 2026-09-22
 
 - Q: Khi Admin xóa danh mục, hệ thống nên xóa vĩnh viễn (Hard Delete) hay xóa mềm (Soft Delete)? → A: Xóa vĩnh viễn (Hard delete).
-- Q: API lấy danh sách danh mục dành cho Admin và Học viên có cần hỗ trợ phân trang (pagination) không? → A: Cần phân trang (để tối ưu cho danh sách dài).
+- Q: API lấy danh sách danh mục dành cho Admin và Public (chưa đăng nhập) có cần hỗ trợ phân trang (pagination) không? → A: Cần phân trang (để tối ưu cho danh sách dài).
 - Q: Nếu Admin tạo một danh mục mới mà KHÔNG nhập số thứ tự (Sequence), hệ thống nên xử lý thế nào? → A: Tự động lấy giá trị sequence lớn nhất hiện tại cộng thêm 1 (Max + 1, đẩy xuống cuối danh sách).
 - Q: Danh mục có cần một trường để lưu trữ hình ảnh hoặc icon hiển thị trên frontend không? → A: Chỉ hoàn toàn là văn bản (Text only).
 - Q: Do categories need a status (e.g., Active/Hidden) so administrators can hide them from learners while preparing content, or are all created categories immediately visible? → A: Option A (Active/Hidden status. Hidden categories are only visible to admins.)
@@ -38,19 +38,19 @@ As an Administrator, I want to create, read, update, and delete exam/course cate
 
 ---
 
-### User Story 2 - Learner views available categories (Priority: P1)
+### User Story 2 - Public User views available categories (Priority: P1)
 
-As a Learner, I want to view a list of all available categories so that I can choose which topic to study (e.g., Parts of Speech, Passive Voice, Word Endings).
+As a Public User (without logging in), I want to view a list of all available categories so that I can see which topics are available to study (e.g., Parts of Speech, Passive Voice, Word Endings).
 
-**Why this priority**: It is essential for the core learner journey. Learners need to see what topics are available to begin studying.
+**Why this priority**: It is essential for the core journey. Users need to see what topics are available to begin studying, even before logging in.
 
-**Independent Test**: Can be tested by logging in as a learner, navigating to the categories section, and verifying that the returned list matches the categories present in the system, sorted by the custom sequence.
+**Independent Test**: Can be tested without logging in, navigating to the categories endpoint, and verifying that the returned list matches the categories present in the system, sorted by the custom sequence.
 
 **Acceptance Scenarios**:
 
-1. **Given** there are existing active categories in the system, **When** a Learner requests to view the categories, **Then** they receive a complete list of all available active categories, sorted by their designated sequence order.
-2. **Given** there are no active categories in the system, **When** a Learner requests to view the categories, **Then** they see an empty list or a message indicating no categories are available.
-3. **Given** there is a mix of active and hidden categories, **When** a Learner requests to view the categories, **Then** only the active categories are returned.
+1. **Given** there are existing active categories in the system, **When** a Public User requests to view the categories, **Then** they receive a complete list of all available active categories, sorted by their designated sequence order.
+2. **Given** there are no active categories in the system, **When** a Public User requests to view the categories, **Then** they see an empty list or a message indicating no categories are available.
+3. **Given** there is a mix of active and hidden categories, **When** a Public User requests to view the categories, **Then** only the active categories are returned.
 
 ---
 
@@ -77,7 +77,7 @@ As a System Administrator, I want an endpoint (`sync-defaults`) that can automat
 ### Functional Requirements
 
 - **FR-001**: The system MUST provide an interface for Administrators to create, read (with pagination support), update, and delete (CRUD) categories, including toggling their status between Active and Hidden, and setting a custom display sequence.
-- **FR-002**: The system MUST provide an interface for Learners to retrieve a paginated list of all Active categories. Hidden categories MUST NOT be returned to Learners. The list MUST be ordered based on the custom display sequence.
+- **FR-002**: The system MUST provide an interface for Public Users (unauthenticated) to retrieve a paginated list of all Active categories. Hidden categories MUST NOT be returned to Public Users. The list MUST be ordered based on the custom display sequence.
 - **FR-003**: The system MUST restrict category creation, updating, and deletion to Administrators only.
 - **FR-004**: The system MUST provide a `sync-defaults` endpoint, restricted to Administrators only.
 - **FR-005**: The `sync-defaults` endpoint MUST accept a list of standard categories (from the frontend) and ensure they exist in the database (defaulting to Active status and appending to the sequence).
@@ -94,10 +94,10 @@ As a System Administrator, I want an endpoint (`sync-defaults`) that can automat
 ### Measurable Outcomes
 
 - **SC-001**: Administrators can successfully complete any category CRUD operation (create, read, update, delete) in under 2 seconds of system response time.
-- **SC-002**: Learners can retrieve the list of categories successfully 100% of the time, with a response time of under 1 second.
+- **SC-002**: Public Users can retrieve the list of categories successfully 100% of the time, with a response time of under 1 second.
 - **SC-003**: The `sync-defaults` endpoint successfully provisions the six standard categories in an empty database on the first try.
 - **SC-004**: Repeated calls to the `sync-defaults` endpoint result in zero duplicated categories.
-- **SC-005**: Unauthorized users (learners) are successfully blocked from performing administrative CRUD operations on categories 100% of the time.
+- **SC-005**: Unauthorized users (public/learners) are successfully blocked from performing administrative CRUD operations on categories 100% of the time.
 
 ## Assumptions
 

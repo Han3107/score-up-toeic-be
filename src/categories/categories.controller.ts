@@ -34,8 +34,6 @@ import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllCategoriesDto } from './dto/find-all-categories.dto';
 
 @ApiTags('Categories')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller({
   path: 'categories',
   version: '1',
@@ -43,6 +41,8 @@ import { FindAllCategoriesDto } from './dto/find-all-categories.dto';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.admin)
   @Post()
   @ApiCreatedResponse({
@@ -52,6 +52,8 @@ export class CategoriesController {
     return this.categoriesService.create(createCategoryDto);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post('sync-defaults')
   @Roles(RoleEnum.admin)
   @ApiOkResponse({
@@ -61,6 +63,8 @@ export class CategoriesController {
     return this.categoriesService.syncDefaults(syncDto);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard(['jwt', 'anonymous']))
   @Get()
   @ApiOkResponse({
     type: InfinityPaginationResponse(Category),
@@ -94,6 +98,8 @@ export class CategoriesController {
     );
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.admin)
   @Get(':id')
   @ApiParam({
@@ -108,6 +114,8 @@ export class CategoriesController {
     return this.categoriesService.findById(id);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.admin)
   @Patch(':id')
   @ApiParam({
@@ -125,6 +133,8 @@ export class CategoriesController {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.admin)
   @Delete(':id')
   @ApiParam({
