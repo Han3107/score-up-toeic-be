@@ -25,35 +25,58 @@ export class ExamResultsService {
       throw new NotFoundException('Exam not found');
     }
 
-    // Insert ExamResult
-    const examResult = new this.examResultModel({
-      userId,
-      examId,
-      score,
-    });
-    await examResult.save();
+    const session = await this.examResultModel.db.startSession();
+    session.startTransaction();
 
-    // Fetch current UserLeaderboard for user
-    let leaderboard = await this.userLeaderboardModel.findOne({ userId });
-
-    if (!leaderboard) {
-      leaderboard = new this.userLeaderboardModel({
+    try {
+      // Insert ExamResult
+      const examResult = new this.examResultModel({
         userId,
-        averageScore: score,
-        totalCompletedExams: 1,
+        examId,
+        score,
       });
-    } else {
-      const oldAvg = leaderboard.averageScore || 0;
-      const oldTotal = leaderboard.totalCompletedExams || 0;
-      const newTotal = oldTotal + 1;
-      const newAverage = (oldAvg * oldTotal + score) / newTotal;
+      await examResult.save({ session });
 
-      leaderboard.averageScore = newAverage;
-      leaderboard.totalCompletedExams = newTotal;
+      // Upsert UserLeaderboard atomically with aggregation pipeline
+      await this.userLeaderboardModel.findOneAndUpdate(
+        { userId },
+        [
+          {
+            $set: {
+              totalCompletedExams: {
+                $add: [{ $ifNull: ['$totalCompletedExams', 0] }, 1],
+              },
+              averageScore: {
+                $divide: [
+                  {
+                    $add: [
+                      {
+                        $multiply: [
+                          { $ifNull: ['$averageScore', 0] },
+                          { $ifNull: ['$totalCompletedExams', 0] },
+                        ],
+                      },
+                      score,
+                    ],
+                  },
+                  {
+                    $add: [{ $ifNull: ['$totalCompletedExams', 0] }, 1],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        { upsert: true, new: true, session },
+      );
+
+      await session.commitTransaction();
+      return examResult;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
     }
-
-    await leaderboard.save();
-
-    return examResult;
   }
 }

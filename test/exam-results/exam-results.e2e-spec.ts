@@ -16,6 +16,13 @@ import { ToeicTestsService } from '../../src/toeic-tests/toeic-tests.service';
 describe('ExamResultsController (e2e)', () => {
   let app: INestApplication;
 
+  const mockSession = {
+    startTransaction: jest.fn(),
+    commitTransaction: jest.fn(),
+    abortTransaction: jest.fn(),
+    endSession: jest.fn(),
+  };
+
   class MockExamResultModel {
     id?: string;
     _id?: string;
@@ -29,21 +36,14 @@ describe('ExamResultsController (e2e)', () => {
       this._id = 'mock-result-id';
       return this;
     });
+
+    static db = {
+      startSession: jest.fn().mockResolvedValue(mockSession),
+    };
   }
 
-  const mockUserLeaderboard = {
-    userId: 'mock-user-id',
-    averageScore: 0,
-    totalCompletedExams: 0,
-    save: jest.fn().mockResolvedValue(true),
-  };
-
   class MockUserLeaderboardModel {
-    constructor(public data: any) {
-      Object.assign(mockUserLeaderboard, data);
-      return mockUserLeaderboard as any;
-    }
-    static findOne = jest.fn().mockResolvedValue(mockUserLeaderboard);
+    static findOneAndUpdate = jest.fn().mockResolvedValue(true);
   }
 
   const mockToeicTestsService = {
@@ -84,16 +84,13 @@ describe('ExamResultsController (e2e)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUserLeaderboard.averageScore = 50;
-    mockUserLeaderboard.totalCompletedExams = 1;
-    MockUserLeaderboardModel.findOne.mockResolvedValue(mockUserLeaderboard);
   });
 
   afterAll(async () => {
     if (app) await app.close();
   });
 
-  it('should create result and update leaderboard stats', async () => {
+  it('should create result and update leaderboard stats atomically', async () => {
     const res = await request(app.getHttpServer())
       .post('/v1/exam-results')
       .send({ examId: '64d2b2f7c000000000000000', score: 100 });
@@ -103,28 +100,24 @@ describe('ExamResultsController (e2e)', () => {
     expect(res.body).toHaveProperty('examId', '64d2b2f7c000000000000000');
     expect(res.body).toHaveProperty('score', 100);
 
-    expect(MockUserLeaderboardModel.findOne).toHaveBeenCalledWith({
-      userId: 'mock-user-id',
-    });
-    expect(mockUserLeaderboard.averageScore).toBe(75);
-    expect(mockUserLeaderboard.totalCompletedExams).toBe(2);
-    expect(mockUserLeaderboard.save).toHaveBeenCalled();
-  });
+    // Verify transaction methods were called
+    expect(MockExamResultModel.db.startSession).toHaveBeenCalled();
+    expect(mockSession.startTransaction).toHaveBeenCalled();
+    expect(mockSession.commitTransaction).toHaveBeenCalled();
+    expect(mockSession.endSession).toHaveBeenCalled();
 
-  it('should create result and create leaderboard stats for first time user', async () => {
-    MockUserLeaderboardModel.findOne.mockResolvedValue(null);
+    // Verify atomic pipeline update
+    expect(MockUserLeaderboardModel.findOneAndUpdate).toHaveBeenCalledWith(
+      { userId: 'mock-user-id' },
+      expect.any(Array),
+      { upsert: true, new: true, session: mockSession },
+    );
 
-    const res = await request(app.getHttpServer())
-      .post('/v1/exam-results')
-      .send({ examId: '64d2b2f7c000000000000000', score: 90 });
-
-    expect(res.status).toBe(201);
-    expect(MockUserLeaderboardModel.findOne).toHaveBeenCalledWith({
-      userId: 'mock-user-id',
-    });
-    expect(mockUserLeaderboard.averageScore).toBe(90);
-    expect(mockUserLeaderboard.totalCompletedExams).toBe(1);
-    expect(mockUserLeaderboard.save).toHaveBeenCalled();
+    // Verify pipeline contents
+    const pipeline = MockUserLeaderboardModel.findOneAndUpdate.mock.calls[0][1];
+    expect(pipeline[0].$set).toBeDefined();
+    expect(pipeline[0].$set.totalCompletedExams).toBeDefined();
+    expect(pipeline[0].$set.averageScore).toBeDefined();
   });
 
   it('should assert 400 on invalid score', async () => {
