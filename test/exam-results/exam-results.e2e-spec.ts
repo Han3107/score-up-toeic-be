@@ -82,6 +82,13 @@ describe('ExamResultsController (e2e)', () => {
     await app.init();
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUserLeaderboard.averageScore = 50;
+    mockUserLeaderboard.totalCompletedExams = 1;
+    MockUserLeaderboardModel.findOne.mockResolvedValue(mockUserLeaderboard);
+  });
+
   afterAll(async () => {
     if (app) await app.close();
   });
@@ -95,6 +102,29 @@ describe('ExamResultsController (e2e)', () => {
     expect(res.body).toHaveProperty('id', 'mock-result-id');
     expect(res.body).toHaveProperty('examId', '64d2b2f7c000000000000000');
     expect(res.body).toHaveProperty('score', 100);
+
+    expect(MockUserLeaderboardModel.findOne).toHaveBeenCalledWith({
+      userId: 'mock-user-id',
+    });
+    expect(mockUserLeaderboard.averageScore).toBe(75);
+    expect(mockUserLeaderboard.totalCompletedExams).toBe(2);
+    expect(mockUserLeaderboard.save).toHaveBeenCalled();
+  });
+
+  it('should create result and create leaderboard stats for first time user', async () => {
+    MockUserLeaderboardModel.findOne.mockResolvedValue(null);
+
+    const res = await request(app.getHttpServer())
+      .post('/v1/exam-results')
+      .send({ examId: '64d2b2f7c000000000000000', score: 90 });
+
+    expect(res.status).toBe(201);
+    expect(MockUserLeaderboardModel.findOne).toHaveBeenCalledWith({
+      userId: 'mock-user-id',
+    });
+    expect(mockUserLeaderboard.averageScore).toBe(90);
+    expect(mockUserLeaderboard.totalCompletedExams).toBe(1);
+    expect(mockUserLeaderboard.save).toHaveBeenCalled();
   });
 
   it('should assert 400 on invalid score', async () => {
