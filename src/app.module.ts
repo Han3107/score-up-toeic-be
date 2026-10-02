@@ -41,8 +41,11 @@ import { FoldersModule } from './folders/folders.module';
 
 import { VocabularyModulesModule } from './vocabulary-modules/vocabulary-modules.module';
 
+import { ExamResultsModule } from './exam-results/exam-results.module';
+
 @Module({
   imports: [
+    ExamResultsModule,
     ScheduleModule.forRoot(),
     VocabularyModulesModule,
     FoldersModule,
