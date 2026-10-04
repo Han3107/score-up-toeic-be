@@ -122,7 +122,7 @@ describe('Auth Module', () => {
   });
 
   describe('Forgot password', () => {
-    it('should reset password only once per link: /api/v1/auth/reset/password (POST)', async () => {
+    it('should reset password only once per link: /api/v1/auth/password-recovery/confirm (POST)', async () => {
       const userEmail = `forgot.${Date.now()}@example.com`;
       const userOldPassword = `secret`;
       const userNewPassword = `new-secret-${Date.now()}`;
@@ -138,7 +138,7 @@ describe('Auth Module', () => {
         .expect(204);
 
       await request(app)
-        .post('/api/v1/auth/forgot/password')
+        .post('/api/v1/auth/password-recovery')
         .send({ email: userEmail })
         .expect(204);
 
@@ -156,7 +156,7 @@ describe('Auth Module', () => {
         );
 
       await request(app)
-        .post('/api/v1/auth/reset/password')
+        .post('/api/v1/auth/password-recovery/confirm')
         .send({ hash, password: userNewPassword })
         .expect(204);
 
@@ -171,7 +171,7 @@ describe('Auth Module', () => {
       // The link is single-use: the reset token is bound to the previous
       // password hash, so replaying it must fail.
       await request(app)
-        .post('/api/v1/auth/reset/password')
+        .post('/api/v1/auth/password-recovery/confirm')
         .send({ hash, password: 'another-password' })
         .expect(422);
 
