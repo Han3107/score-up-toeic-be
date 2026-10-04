@@ -41,6 +41,9 @@ import { FoldersModule } from './folders/folders.module';
 
 import { VocabularyModulesModule } from './vocabulary-modules/vocabulary-modules.module';
 
+import { LeaderboardsModule } from './leaderboards/leaderboards.module';
+import { ExamsModule } from './exams/exams.module';
+
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -50,6 +53,8 @@ import { VocabularyModulesModule } from './vocabulary-modules/vocabulary-modules
     QuestionGroupsModule,
     ToeicTestsModule,
     CategoriesModule,
+    LeaderboardsModule,
+    ExamsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [

@@ -279,6 +279,7 @@ export class UsersService {
       status,
       provider: updateUserDto.provider,
       socialId: updateUserDto.socialId,
+      leaderboardStats: updateUserDto.leaderboardStats,
     });
   }
 

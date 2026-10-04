@@ -71,4 +71,11 @@ export class User {
 
   @ApiProperty()
   deletedAt: Date;
+
+  @ApiProperty()
+  leaderboardStats?: {
+    averageScore: number;
+    totalCompletedExams: number;
+    lastExamCompletedAt: Date;
+  };
 }

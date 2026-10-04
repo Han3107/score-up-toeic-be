@@ -37,6 +37,14 @@ export class UserMapper {
     domainEntity.updatedAt = raw.updatedAt;
     domainEntity.deletedAt = raw.deletedAt;
 
+    if (raw.leaderboardStats) {
+      domainEntity.leaderboardStats = {
+        averageScore: raw.leaderboardStats.averageScore,
+        totalCompletedExams: raw.leaderboardStats.totalCompletedExams,
+        lastExamCompletedAt: raw.leaderboardStats.lastExamCompletedAt,
+      };
+    }
+
     return domainEntity;
   }
 
@@ -79,6 +87,14 @@ export class UserMapper {
     persistenceSchema.createdAt = domainEntity.createdAt;
     persistenceSchema.updatedAt = domainEntity.updatedAt;
     persistenceSchema.deletedAt = domainEntity.deletedAt;
+
+    if (domainEntity.leaderboardStats) {
+      persistenceSchema.leaderboardStats = {
+        averageScore: domainEntity.leaderboardStats.averageScore,
+        totalCompletedExams: domainEntity.leaderboardStats.totalCompletedExams,
+        lastExamCompletedAt: domainEntity.leaderboardStats.lastExamCompletedAt,
+      };
+    }
     return persistenceSchema;
   }
 }

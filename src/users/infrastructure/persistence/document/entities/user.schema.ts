@@ -16,6 +16,24 @@ export type UserSchemaDocument = HydratedDocument<UserSchemaClass>;
     getters: true,
   },
 })
+export class LeaderboardStats {
+  @Prop({ default: 0 })
+  averageScore: number;
+
+  @Prop({ default: 0 })
+  totalCompletedExams: number;
+
+  @Prop({ default: null })
+  lastExamCompletedAt: Date;
+}
+
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    getters: true,
+  },
+})
 export class UserSchemaClass extends EntityDocumentHelper {
   @Prop({
     type: String,
@@ -70,8 +88,19 @@ export class UserSchemaClass extends EntityDocumentHelper {
 
   @Prop()
   deletedAt: Date;
+
+  @Prop({
+    type: LeaderboardStats,
+    default: () => ({}),
+  })
+  leaderboardStats: LeaderboardStats;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserSchemaClass);
 
 UserSchema.index({ 'role._id': 1 });
+UserSchema.index({
+  'leaderboardStats.averageScore': -1,
+  'leaderboardStats.totalCompletedExams': -1,
+  'leaderboardStats.lastExamCompletedAt': 1,
+});

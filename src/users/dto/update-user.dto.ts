@@ -45,4 +45,11 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
   @Type(() => StatusDto)
   status?: StatusDto;
+
+  @IsOptional()
+  leaderboardStats?: {
+    averageScore: number;
+    totalCompletedExams: number;
+    lastExamCompletedAt: Date;
+  };
 }
