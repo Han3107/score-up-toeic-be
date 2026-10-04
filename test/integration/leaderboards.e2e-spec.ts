@@ -1,27 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { describe, it } from '@jest/globals';
 import request from 'supertest';
-import { AppModule } from '../../src/app.module';
+import { APP_URL } from '../utils/constants';
 
 describe('LeaderboardsController (e2e)', () => {
-  let app: INestApplication;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
+  const app = APP_URL;
 
   it('should return 401 Unauthorized without token for /api/v1/leaderboards/exams (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/api/v1/leaderboards/exams')
-      .expect(401);
+    return request(app).get('/api/v1/leaderboards/exams').expect(401);
   });
 });
