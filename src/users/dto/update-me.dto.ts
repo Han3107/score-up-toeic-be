@@ -4,7 +4,7 @@ import { FileDto } from '../../files/dto/file.dto';
 import { Transform } from 'class-transformer';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer';
 
-export class AuthUpdateDto {
+export class UpdateMeDto {
   @ApiPropertyOptional({ type: () => FileDto })
   @IsOptional()
   photo?: FileDto | null;

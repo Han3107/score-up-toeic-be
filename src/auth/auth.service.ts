@@ -11,7 +11,7 @@ import { randomStringGenerator } from '@nestjs/common/utils/random-string-genera
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcryptjs';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
-import { AuthUpdateDto } from './dto/auth-update.dto';
+import { UpdateMeDto } from '../users/dto/update-me.dto';
 import { AuthProvidersEnum } from './auth-providers.enum';
 import { SocialInterface } from '../social/interfaces/social.interface';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
@@ -425,7 +425,7 @@ export class AuthService {
 
   async update(
     userJwtPayload: JwtPayloadType,
-    userDto: AuthUpdateDto,
+    userDto: UpdateMeDto,
   ): Promise<NullableType<User>> {
     const currentUser = await this.usersService.findById(userJwtPayload.id);
 

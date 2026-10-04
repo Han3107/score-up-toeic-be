@@ -194,9 +194,9 @@ describe('Auth Module', () => {
         });
     });
 
-    it('should retrieve your own profile: /api/v1/auth/me (GET)', async () => {
+    it('should retrieve your own profile: /api/v1/users/me (GET)', async () => {
       await request(app)
-        .get('/api/v1/auth/me')
+        .get('/api/v1/users/me')
         .auth(newUserApiToken, {
           type: 'bearer',
         })
@@ -258,7 +258,7 @@ describe('Auth Module', () => {
         .expect(401);
     });
 
-    it('should update profile successfully: /api/v1/auth/me (PATCH)', async () => {
+    it('should update profile successfully: /api/v1/users/me (PATCH)', async () => {
       const newUserNewName = Date.now();
       const newUserNewPassword = 'new-secret';
       const newUserApiToken = await request(app)
@@ -267,7 +267,7 @@ describe('Auth Module', () => {
         .then(({ body }) => body.token);
 
       await request(app)
-        .patch('/api/v1/auth/me')
+        .patch('/api/v1/users/me')
         .auth(newUserApiToken, {
           type: 'bearer',
         })
@@ -278,7 +278,7 @@ describe('Auth Module', () => {
         .expect(422);
 
       await request(app)
-        .patch('/api/v1/auth/me')
+        .patch('/api/v1/users/me')
         .auth(newUserApiToken, {
           type: 'bearer',
         })
@@ -298,7 +298,7 @@ describe('Auth Module', () => {
         });
 
       await request(app)
-        .patch('/api/v1/auth/me')
+        .patch('/api/v1/users/me')
         .auth(newUserApiToken, {
           type: 'bearer',
         })
@@ -306,7 +306,7 @@ describe('Auth Module', () => {
         .expect(200);
     });
 
-    it('should update profile email successfully: /api/v1/auth/me (PATCH)', async () => {
+    it('should update profile email successfully: /api/v1/users/me (PATCH)', async () => {
       const newUserFirstName = `Tester${Date.now()}`;
       const newUserLastName = `E2E`;
       const newUserEmail = `user.${Date.now()}@example.com`;
@@ -329,7 +329,7 @@ describe('Auth Module', () => {
         .then(({ body }) => body.token);
 
       await request(app)
-        .patch('/api/v1/auth/me')
+        .patch('/api/v1/users/me')
         .auth(newUserApiToken, {
           type: 'bearer',
         })
@@ -353,7 +353,7 @@ describe('Auth Module', () => {
         );
 
       await request(app)
-        .get('/api/v1/auth/me')
+        .get('/api/v1/users/me')
         .auth(newUserApiToken, {
           type: 'bearer',
         })
@@ -375,7 +375,7 @@ describe('Auth Module', () => {
         .expect(204);
 
       await request(app)
-        .get('/api/v1/auth/me')
+        .get('/api/v1/users/me')
         .auth(newUserApiToken, {
           type: 'bearer',
         })
@@ -390,13 +390,13 @@ describe('Auth Module', () => {
         .expect(200);
     });
 
-    it('should delete profile successfully: /api/v1/auth/me (DELETE)', async () => {
+    it('should delete profile successfully: /api/v1/users/me (DELETE)', async () => {
       const newUserApiToken = await request(app)
         .post('/api/v1/auth/email/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .then(({ body }) => body.token);
 
-      await request(app).delete('/api/v1/auth/me').auth(newUserApiToken, {
+      await request(app).delete('/api/v1/users/me').auth(newUserApiToken, {
         type: 'bearer',
       });
 
