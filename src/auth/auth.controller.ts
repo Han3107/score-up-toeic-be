@@ -11,7 +11,6 @@ import {
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
-import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
@@ -33,7 +32,9 @@ export class AuthController {
   })
   @Post('email/login')
   @HttpCode(HttpStatus.OK)
-  public login(@Body() loginDto: AuthEmailLoginDto): Promise<LoginResponseDto> {
+  public login(
+    @Body() loginDto: AuthEmailLoginDto,
+  ): Promise<LoginResponseDto> {
     return this.service.validateLogin(loginDto);
   }
 
@@ -43,22 +44,6 @@ export class AuthController {
     @Body() createUserDto: AuthRegisterLoginDto,
   ): Promise<void> {
     return this.service.register(createUserDto);
-  }
-
-  @Post('email/confirm')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async confirmEmail(
-    @Body() confirmEmailDto: AuthConfirmEmailDto,
-  ): Promise<void> {
-    return this.service.confirmEmail(confirmEmailDto.hash);
-  }
-
-  @Post('email/confirm/new')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async confirmNewEmail(
-    @Body() confirmEmailDto: AuthConfirmEmailDto,
-  ): Promise<void> {
-    return this.service.confirmNewEmail(confirmEmailDto.hash);
   }
 
   @ApiBearerAuth()

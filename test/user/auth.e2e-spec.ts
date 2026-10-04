@@ -58,7 +58,7 @@ describe('Auth Module', () => {
     });
 
     describe('Confirm email', () => {
-      it('should successfully: /api/v1/auth/email/confirm (POST)', async () => {
+      it('should successfully: /api/v1/auth/email-verification (POST)', async () => {
         const hash = await request(mail)
           .get('/email')
           .then(({ body }) =>
@@ -73,14 +73,14 @@ describe('Auth Module', () => {
           );
 
         return request(app)
-          .post('/api/v1/auth/email/confirm')
+          .post('/api/v1/auth/email-verification')
           .send({
             hash,
           })
           .expect(204);
       });
 
-      it('should fail for already confirmed email: /api/v1/auth/email/confirm (POST)', async () => {
+      it('should fail for already confirmed email: /api/v1/auth/email-verification (POST)', async () => {
         const hash = await request(mail)
           .get('/email')
           .then(({ body }) =>
@@ -95,7 +95,7 @@ describe('Auth Module', () => {
           );
 
         return request(app)
-          .post('/api/v1/auth/email/confirm')
+          .post('/api/v1/auth/email-verification')
           .send({
             hash,
           })
@@ -368,7 +368,7 @@ describe('Auth Module', () => {
         .expect(422);
 
       await request(app)
-        .post('/api/v1/auth/email/confirm/new')
+        .post('/api/v1/auth/email-verification/resend')
         .send({
           hash,
         })
