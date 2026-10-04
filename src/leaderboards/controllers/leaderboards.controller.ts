@@ -10,7 +10,10 @@ import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Leaderboards')
 @UseGuards(AuthGuard('jwt'))
-@Controller('api/v1/leaderboards')
+@Controller({
+  path: 'leaderboards',
+  version: '1',
+})
 export class LeaderboardsController {
   constructor(private readonly leaderboardsService: LeaderboardsService) {}
 
