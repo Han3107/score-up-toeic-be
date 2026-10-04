@@ -10,11 +10,11 @@ import crypto from 'crypto';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcryptjs';
-import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
-import { AuthUpdateDto } from './dto/auth-update.dto';
+import { AuthLoginDto } from './dto/auth-login.dto';
+import { UpdateMeDto } from '../users/dto/update-me.dto';
 import { AuthProvidersEnum } from './auth-providers.enum';
 import { SocialInterface } from '../social/interfaces/social.interface';
-import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
+import { AuthRegisterDto } from './dto/auth-register.dto';
 import { NullableType } from '../utils/types/nullable.type';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { ConfigService } from '@nestjs/config';
@@ -39,7 +39,7 @@ export class AuthService {
     private readonly configService: ConfigService<AllConfigType>,
   ) {}
 
-  async validateLogin(loginDto: AuthEmailLoginDto): Promise<LoginResponseDto> {
+  async validateLogin(loginDto: AuthLoginDto): Promise<LoginResponseDto> {
     const user = await this.usersService.findByEmail(loginDto.email);
 
     if (!user) {
@@ -197,7 +197,7 @@ export class AuthService {
     };
   }
 
-  async register(dto: AuthRegisterLoginDto): Promise<void> {
+  async register(dto: AuthRegisterDto): Promise<void> {
     const user = await this.usersService.create({
       ...dto,
       email: dto.email,
@@ -425,7 +425,7 @@ export class AuthService {
 
   async update(
     userJwtPayload: JwtPayloadType,
-    userDto: AuthUpdateDto,
+    userDto: UpdateMeDto,
   ): Promise<NullableType<User>> {
     const currentUser = await this.usersService.findById(userJwtPayload.id);
 
