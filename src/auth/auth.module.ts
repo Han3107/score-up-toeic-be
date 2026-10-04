@@ -20,7 +20,11 @@ import { UsersModule } from '../users/users.module';
     MailModule,
     JwtModule.register({}),
   ],
-  controllers: [AuthController, PasswordRecoveryController, EmailVerificationController],
+  controllers: [
+    AuthController,
+    PasswordRecoveryController,
+    EmailVerificationController,
+  ],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy, AnonymousStrategy],
   exports: [AuthService],
 })

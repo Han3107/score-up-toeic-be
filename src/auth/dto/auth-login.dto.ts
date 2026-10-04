@@ -3,7 +3,7 @@ import { IsEmail, IsNotEmpty } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer';
 
-export class AuthEmailLoginDto {
+export class AuthLoginDto {
   @ApiProperty({ example: 'test1@example.com', type: String })
   @Transform(lowerCaseTransformer)
   @IsEmail()

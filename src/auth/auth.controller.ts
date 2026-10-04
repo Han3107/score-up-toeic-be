@@ -10,8 +10,8 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
-import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
+import { AuthLoginDto } from './dto/auth-login.dto';
+import { AuthRegisterDto } from './dto/auth-register.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
 import type { RequestWithUser } from '../utils/types/request-with-user.type';
@@ -30,18 +30,16 @@ export class AuthController {
   @SerializeOptions({
     groups: ['me'],
   })
-  @Post('email/login')
+  @Post('login')
   @HttpCode(HttpStatus.OK)
-  public login(
-    @Body() loginDto: AuthEmailLoginDto,
-  ): Promise<LoginResponseDto> {
+  public login(@Body() loginDto: AuthLoginDto): Promise<LoginResponseDto> {
     return this.service.validateLogin(loginDto);
   }
 
-  @Post('email/register')
+  @Post('register')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async register(
-    @Body() createUserDto: AuthRegisterLoginDto,
+    @Body() createUserDto: AuthRegisterDto,
   ): Promise<void> {
     return this.service.register(createUserDto);
   }

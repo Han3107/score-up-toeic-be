@@ -10,7 +10,7 @@ describe('Users Module', () => {
 
   beforeAll(async () => {
     await request(app)
-      .post('/api/v1/auth/email/login')
+      .post('/api/v1/auth/login')
       .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD })
       .then(({ body }) => {
         apiToken = body.token;
@@ -26,7 +26,7 @@ describe('Users Module', () => {
 
     beforeAll(async () => {
       await request(app)
-        .post('/api/v1/auth/email/register')
+        .post('/api/v1/auth/register')
         .send({
           email: newUserEmail,
           password: newUserPassword,
@@ -35,7 +35,7 @@ describe('Users Module', () => {
         });
 
       await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .then(({ body }) => {
           newUser = body.user;
@@ -57,9 +57,9 @@ describe('Users Module', () => {
       });
 
       describe('Guest', () => {
-        it('should login with changed password: /api/v1/auth/email/login (POST)', () => {
+        it('should login with changed password: /api/v1/auth/login (POST)', () => {
           return request(app)
-            .post('/api/v1/auth/email/login')
+            .post('/api/v1/auth/login')
             .send({
               email: newUserChangedEmail,
               password: newUserChangedPassword,
@@ -110,9 +110,9 @@ describe('Users Module', () => {
       });
 
       describe('Guest', () => {
-        it('should successfully login via created by admin user: /api/v1/auth/email/login (GET)', () => {
+        it('should successfully login via created by admin user: /api/v1/auth/login (GET)', () => {
           return request(app)
-            .post('/api/v1/auth/email/login')
+            .post('/api/v1/auth/login')
             .send({
               email: newUserByAdminEmail,
               password: newUserByAdminPassword,

@@ -18,9 +18,9 @@ describe('Auth Module', () => {
   const newUserPassword = `secret`;
 
   describe('Registration', () => {
-    it('should fail with exists email: /api/v1/auth/email/register (POST)', () => {
+    it('should fail with exists email: /api/v1/auth/register (POST)', () => {
       return request(app)
-        .post('/api/v1/auth/email/register')
+        .post('/api/v1/auth/register')
         .send({
           email: TESTER_EMAIL,
           password: TESTER_PASSWORD,
@@ -33,9 +33,9 @@ describe('Auth Module', () => {
         });
     });
 
-    it('should successfully: /api/v1/auth/email/register (POST)', async () => {
+    it('should successfully: /api/v1/auth/register (POST)', async () => {
       return request(app)
-        .post('/api/v1/auth/email/register')
+        .post('/api/v1/auth/register')
         .send({
           email: newUserEmail,
           password: newUserPassword,
@@ -46,9 +46,9 @@ describe('Auth Module', () => {
     });
 
     describe('Login', () => {
-      it('should successfully with unconfirmed email: /api/v1/auth/email/login (POST)', () => {
+      it('should successfully with unconfirmed email: /api/v1/auth/login (POST)', () => {
         return request(app)
-          .post('/api/v1/auth/email/login')
+          .post('/api/v1/auth/login')
           .send({ email: newUserEmail, password: newUserPassword })
           .expect(200)
           .expect(({ body }) => {
@@ -105,9 +105,9 @@ describe('Auth Module', () => {
   });
 
   describe('Login', () => {
-    it('should successfully for user with confirmed email: /api/v1/auth/email/login (POST)', () => {
+    it('should successfully for user with confirmed email: /api/v1/auth/login (POST)', () => {
       return request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .expect(200)
         .expect(({ body }) => {
@@ -128,7 +128,7 @@ describe('Auth Module', () => {
       const userNewPassword = `new-secret-${Date.now()}`;
 
       await request(app)
-        .post('/api/v1/auth/email/register')
+        .post('/api/v1/auth/register')
         .send({
           email: userEmail,
           password: userOldPassword,
@@ -161,7 +161,7 @@ describe('Auth Module', () => {
         .expect(204);
 
       await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: userEmail, password: userNewPassword })
         .expect(200)
         .expect(({ body }) => {
@@ -176,7 +176,7 @@ describe('Auth Module', () => {
         .expect(422);
 
       await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: userEmail, password: userNewPassword })
         .expect(200);
     });
@@ -187,7 +187,7 @@ describe('Auth Module', () => {
 
     beforeAll(async () => {
       await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .then(({ body }) => {
           newUserApiToken = body.token;
@@ -211,7 +211,7 @@ describe('Auth Module', () => {
 
     it('should get new refresh token: /api/v1/auth/refresh (POST)', async () => {
       let newUserRefreshToken = await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .then(({ body }) => body.refreshToken);
 
@@ -238,7 +238,7 @@ describe('Auth Module', () => {
 
     it('should fail on the second attempt to refresh token with the same token: /api/v1/auth/refresh (POST)', async () => {
       const newUserRefreshToken = await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .then(({ body }) => body.refreshToken);
 
@@ -262,7 +262,7 @@ describe('Auth Module', () => {
       const newUserNewName = Date.now();
       const newUserNewPassword = 'new-secret';
       const newUserApiToken = await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .then(({ body }) => body.token);
 
@@ -290,7 +290,7 @@ describe('Auth Module', () => {
         .expect(200);
 
       await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserNewPassword })
         .expect(200)
         .expect(({ body }) => {
@@ -314,7 +314,7 @@ describe('Auth Module', () => {
       const newUserNewEmail = `new.${newUserEmail}`;
 
       await request(app)
-        .post('/api/v1/auth/email/register')
+        .post('/api/v1/auth/register')
         .send({
           email: newUserEmail,
           password: newUserPassword,
@@ -324,7 +324,7 @@ describe('Auth Module', () => {
         .expect(204);
 
       const newUserApiToken = await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .then(({ body }) => body.token);
 
@@ -363,7 +363,7 @@ describe('Auth Module', () => {
         });
 
       await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserNewEmail, password: newUserPassword })
         .expect(422);
 
@@ -385,14 +385,14 @@ describe('Auth Module', () => {
         });
 
       await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserNewEmail, password: newUserPassword })
         .expect(200);
     });
 
     it('should delete profile successfully: /api/v1/users/me (DELETE)', async () => {
       const newUserApiToken = await request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .then(({ body }) => body.token);
 
@@ -401,7 +401,7 @@ describe('Auth Module', () => {
       });
 
       return request(app)
-        .post('/api/v1/auth/email/login')
+        .post('/api/v1/auth/login')
         .send({ email: newUserEmail, password: newUserPassword })
         .expect(422);
     });
