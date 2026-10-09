@@ -27,5 +27,7 @@ export abstract class FriendRequestRepository {
 
   abstract remove(id: FriendRequest['id']): Promise<void>;
 
+  abstract findPendingRequests(userId: string): Promise<FriendRequest[]>;
+  abstract findFriends(userId: string): Promise<FriendRequest[]>;
   abstract areFriends(user1Id: string, user2Id: string): Promise<boolean>;
 }

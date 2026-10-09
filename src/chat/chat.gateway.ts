@@ -13,15 +13,16 @@ import { FriendRequestsService } from '../friend-requests/friend-requests.servic
 import { ConversationsService } from '../conversations/conversations.service';
 import { UserDto } from '../users/dto/user.dto';
 import { ConversationDto } from '../conversations/dto/conversation.dto';
+import { forwardRef, Inject } from '@nestjs/common';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-  private connectedUsers = new Map<string, string>();
 
   constructor(
     private jwtService: JwtService,
     private messagesService: MessagesService,
+    @Inject(forwardRef(() => FriendRequestsService))
     private friendRequestsService: FriendRequestsService,
     private conversationsService: ConversationsService,
   ) {}
@@ -37,16 +38,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.data = {};
       }
       client.data.user = payload;
-      this.connectedUsers.set(payload.id, client.id);
+
+      // Join room with user ID for multi-device support
+      const userId = payload.id.toString();
+      void client.join(userId);
     } catch {
       client.disconnect();
     }
   }
 
-  handleDisconnect(client: Socket) {
-    if (client.data?.user?.id) {
-      this.connectedUsers.delete(client.data.user.id);
-    }
+  handleDisconnect() {
+    // Rooms are automatically left upon disconnect
   }
 
   @SubscribeMessage('sendMessage')
@@ -93,9 +95,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       isRead: false,
     });
 
-    const receiverSocketId = this.connectedUsers.get(payload.receiverId);
-    if (receiverSocketId) {
-      this.server.to(receiverSocketId).emit('receiveMessage', message);
-    }
+    // Update conversation's lastMessage
+    await this.conversationsService.update(payload.conversationId, {
+      lastMessage: message as any,
+    });
+
+    // Emit to receiver's room (supports multiple devices)
+    this.server
+      .to(payload.receiverId.toString())
+      .emit('receiveMessage', message);
   }
 }

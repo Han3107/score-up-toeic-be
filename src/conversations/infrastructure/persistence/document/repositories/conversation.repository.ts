@@ -52,6 +52,16 @@ export class ConversationDocumentRepository implements ConversationRepository {
     );
   }
 
+  async findByParticipants(
+    user1Id: string,
+    user2Id: string,
+  ): Promise<NullableType<Conversation>> {
+    const entityObject = await this.conversationModel.findOne({
+      participants: { $all: [user1Id, user2Id] } as any,
+    });
+    return entityObject ? ConversationMapper.toDomain(entityObject) : null;
+  }
+
   async findById(id: Conversation['id']): Promise<NullableType<Conversation>> {
     const entityObject = await this.conversationModel.findById(id);
     return entityObject ? ConversationMapper.toDomain(entityObject) : null;

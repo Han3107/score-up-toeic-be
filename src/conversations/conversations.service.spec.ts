@@ -32,6 +32,24 @@ describe('ConversationsService', () => {
     service = module.get<ConversationsService>(ConversationsService);
   });
 
+  describe('findByParticipantWithPagination', () => {
+    it('should call repository method and return conversations', async () => {
+      const mockResult = [{ id: 'conv1' }, { id: 'conv2' }];
+      mockConversationRepo.findByParticipantWithPagination.mockResolvedValue(
+        mockResult,
+      );
+
+      const result = await service.findByParticipantWithPagination('user1', {
+        page: 1,
+        limit: 10,
+      });
+      expect(
+        mockConversationRepo.findByParticipantWithPagination,
+      ).toHaveBeenCalledWith('user1', { page: 1, limit: 10 });
+      expect(result).toEqual(mockResult);
+    });
+  });
+
   describe('findMessagesByConversation', () => {
     it('should throw NotFoundException if conversation does not exist', async () => {
       mockConversationRepo.findById.mockResolvedValue(null);

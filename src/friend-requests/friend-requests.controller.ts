@@ -6,85 +6,43 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
-  Query,
 } from '@nestjs/common';
 import { FriendRequestsService } from './friend-requests.service';
-import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
-import { UpdateFriendRequestDto } from './dto/update-friend-request.dto';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { FriendRequest } from './domain/friend-request';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  InfinityPaginationResponse,
-  InfinityPaginationResponseDto,
-} from '../utils/dto/infinity-pagination-response.dto';
-import { infinityPagination } from '../utils/infinity-pagination';
-import { FindAllFriendRequestsDto } from './dto/find-all-friend-requests.dto';
 
-@ApiTags('Friendrequests')
+@ApiTags('FriendRequests')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller({
-  path: 'friend-requests',
+  path: 'friends',
   version: '1',
 })
 export class FriendRequestsController {
   constructor(private readonly friendRequestsService: FriendRequestsService) {}
 
-  @Post()
-  @ApiCreatedResponse({
+  @Post('request')
+  @ApiOkResponse({
     type: FriendRequest,
   })
-  create(@Body() createFriendRequestDto: CreateFriendRequestDto) {
-    return this.friendRequestsService.create(createFriendRequestDto);
-  }
-
-  @Get()
-  @ApiOkResponse({
-    type: InfinityPaginationResponse(FriendRequest),
-  })
-  async findAll(
-    @Query() query: FindAllFriendRequestsDto,
-  ): Promise<InfinityPaginationResponseDto<FriendRequest>> {
-    const page = query?.page ?? 1;
-    let limit = query?.limit ?? 10;
-    if (limit > 50) {
-      limit = 50;
-    }
-
-    return infinityPagination(
-      await this.friendRequestsService.findAllWithPagination({
-        paginationOptions: {
-          page,
-          limit,
-        },
-      }),
-      { page, limit },
+  createRequest(
+    @Request() request: any,
+    @Body('receiverId') receiverId: string,
+  ) {
+    return this.friendRequestsService.createRequest(
+      request.user?.id,
+      receiverId,
     );
   }
 
-  @Get(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  @ApiOkResponse({
-    type: FriendRequest,
-  })
-  findById(@Param('id') id: string) {
-    return this.friendRequestsService.findById(id);
-  }
-
-  @Post(':id/accept')
+  @Patch('request/:id/accept')
   @ApiParam({
     name: 'id',
     type: String,
@@ -97,7 +55,7 @@ export class FriendRequestsController {
     return this.friendRequestsService.accept(id, request.user?.id);
   }
 
-  @Patch(':id')
+  @Patch('request/:id/decline')
   @ApiParam({
     name: 'id',
     type: String,
@@ -106,20 +64,23 @@ export class FriendRequestsController {
   @ApiOkResponse({
     type: FriendRequest,
   })
-  update(
-    @Param('id') id: string,
-    @Body() updateFriendRequestDto: UpdateFriendRequestDto,
-  ) {
-    return this.friendRequestsService.update(id, updateFriendRequestDto);
+  decline(@Param('id') id: string, @Request() request: any) {
+    return this.friendRequestsService.decline(id, request.user?.id);
   }
 
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
+  @Get('requests')
+  @ApiOkResponse({
+    type: [FriendRequest],
   })
-  remove(@Param('id') id: string) {
-    return this.friendRequestsService.remove(id);
+  getPendingRequests(@Request() request: any) {
+    return this.friendRequestsService.getPendingRequests(request.user?.id);
+  }
+
+  @Get()
+  @ApiOkResponse({
+    type: [FriendRequest], // Maybe return Users later, but let's stick to what's simple or friend requests that are accepted
+  })
+  getFriends(@Request() request: any) {
+    return this.friendRequestsService.getFriends(request.user?.id);
   }
 }

@@ -83,6 +83,32 @@ export class FriendRequestDocumentRepository implements FriendRequestRepository 
     await this.friendRequestModel.deleteOne({ _id: id });
   }
 
+  async findPendingRequests(userId: string): Promise<FriendRequest[]> {
+    const entityObjects = await this.friendRequestModel
+      .find({
+        $or: [{ sender: userId }, { receiver: userId }],
+        status: 'pending',
+      } as any)
+      .populate('sender')
+      .populate('receiver');
+    return entityObjects.map((entityObject) =>
+      FriendRequestMapper.toDomain(entityObject),
+    );
+  }
+
+  async findFriends(userId: string): Promise<FriendRequest[]> {
+    const entityObjects = await this.friendRequestModel
+      .find({
+        $or: [{ sender: userId }, { receiver: userId }],
+        status: 'accepted',
+      } as any)
+      .populate('sender')
+      .populate('receiver');
+    return entityObjects.map((entityObject) =>
+      FriendRequestMapper.toDomain(entityObject),
+    );
+  }
+
   async areFriends(user1Id: string, user2Id: string): Promise<boolean> {
     const request = await this.friendRequestModel.findOne({
       $or: [

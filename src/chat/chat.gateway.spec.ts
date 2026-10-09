@@ -11,7 +11,7 @@ describe('ChatGateway', () => {
   const mockJwtService = { verifyAsync: jest.fn() };
   const mockMessagesService = { create: jest.fn() };
   const mockFriendRequestsService = { areFriends: jest.fn() };
-  const mockConversationsService = { findById: jest.fn() };
+  const mockConversationsService = { findById: jest.fn(), update: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -84,10 +84,20 @@ describe('ChatGateway', () => {
     ).rejects.toThrow(WsException);
   });
 
-  it('should remove connected user on disconnect', () => {
-    const client = { id: 'socket1', data: { user: { id: 'user1' } } } as any;
-    gateway['connectedUsers'].set('user1', 'socket1');
-    gateway.handleDisconnect(client);
-    expect(gateway['connectedUsers'].has('user1')).toBe(false);
+  it('should authenticate user and join room on connection', async () => {
+    const client = {
+      id: 'socket1',
+      handshake: { auth: { token: 'valid-token' } },
+      data: {},
+      join: jest.fn(),
+    } as any;
+    mockJwtService.verifyAsync.mockResolvedValue({ id: 'user1' });
+    await gateway.handleConnection(client);
+    expect(client.join).toHaveBeenCalledWith('user1');
+    expect(client.data.user).toEqual({ id: 'user1' });
+  });
+
+  it('should not throw on disconnect', () => {
+    expect(() => gateway.handleDisconnect()).not.toThrow();
   });
 });

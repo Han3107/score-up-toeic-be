@@ -1,24 +1,19 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
   UseGuards,
   Query,
   Request,
 } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
-import { CreateConversationDto } from './dto/create-conversation.dto';
-import { UpdateConversationDto } from './dto/update-conversation.dto';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
   ApiTags,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import { Conversation } from './domain/conversation';
 import { AuthGuard } from '@nestjs/passport';
@@ -28,6 +23,7 @@ import {
 } from '../utils/dto/infinity-pagination-response.dto';
 import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllConversationsDto } from './dto/find-all-conversations.dto';
+import { FindAllMessagesDto } from '../messages/dto/find-all-messages.dto';
 import { Message } from '../messages/domain/message';
 import type { RequestWithUser } from '../utils/types/request-with-user.type';
 import { JwtPayloadType } from '../auth/strategies/types/jwt-payload.type';
@@ -41,14 +37,6 @@ import { JwtPayloadType } from '../auth/strategies/types/jwt-payload.type';
 })
 export class ConversationsController {
   constructor(private readonly conversationsService: ConversationsService) {}
-
-  @Post()
-  @ApiCreatedResponse({
-    type: Conversation,
-  })
-  create(@Body() createConversationDto: CreateConversationDto) {
-    return this.conversationsService.create(createConversationDto);
-  }
 
   @Get()
   @ApiOkResponse({
@@ -85,10 +73,16 @@ export class ConversationsController {
   @ApiOkResponse({
     type: InfinityPaginationResponse(Message),
   })
+  @ApiForbiddenResponse({
+    description: 'Forbidden. User is not a participant of the conversation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Conversation not found.',
+  })
   async findMessages(
     @Request() request: RequestWithUser<JwtPayloadType>,
     @Param('id') id: string,
-    @Query() query: FindAllConversationsDto,
+    @Query() query: FindAllMessagesDto,
   ): Promise<InfinityPaginationResponseDto<Message>> {
     const page = query?.page ?? 1;
     let limit = query?.limit ?? 10;
@@ -107,44 +101,5 @@ export class ConversationsController {
       ),
       { page, limit },
     );
-  }
-
-  @Get(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  @ApiOkResponse({
-    type: Conversation,
-  })
-  findById(@Param('id') id: string) {
-    return this.conversationsService.findById(id);
-  }
-
-  @Patch(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  @ApiOkResponse({
-    type: Conversation,
-  })
-  update(
-    @Param('id') id: string,
-    @Body() updateConversationDto: UpdateConversationDto,
-  ) {
-    return this.conversationsService.update(id, updateConversationDto);
-  }
-
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  remove(@Param('id') id: string) {
-    return this.conversationsService.remove(id);
   }
 }

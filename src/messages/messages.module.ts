@@ -6,7 +6,6 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
-import { MessagesController } from './messages.controller';
 import { DocumentMessagePersistenceModule } from './infrastructure/persistence/document/document-persistence.module';
 
 @Module({
@@ -18,7 +17,7 @@ import { DocumentMessagePersistenceModule } from './infrastructure/persistence/d
     // do not remove this comment
     DocumentMessagePersistenceModule,
   ],
-  controllers: [MessagesController],
+  controllers: [],
   providers: [MessagesService],
   exports: [MessagesService, DocumentMessagePersistenceModule],
 })
