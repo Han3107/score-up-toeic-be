@@ -37,6 +37,21 @@ export class MessageDocumentRepository implements MessageRepository {
     );
   }
 
+  async findByConversationWithPagination(
+    conversationId: string,
+    paginationOptions: IPaginationOptions,
+  ): Promise<Message[]> {
+    const entityObjects = await this.messageModel
+      .find({ conversation: conversationId })
+      .sort({ createdAt: -1 })
+      .skip((paginationOptions.page - 1) * paginationOptions.limit)
+      .limit(paginationOptions.limit);
+
+    return entityObjects.map((entityObject) =>
+      MessageMapper.toDomain(entityObject),
+    );
+  }
+
   async findById(id: Message['id']): Promise<NullableType<Message>> {
     const entityObject = await this.messageModel.findById(id);
     return entityObject ? MessageMapper.toDomain(entityObject) : null;

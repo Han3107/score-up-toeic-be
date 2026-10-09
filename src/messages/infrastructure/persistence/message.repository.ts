@@ -14,6 +14,11 @@ export abstract class MessageRepository {
     paginationOptions: IPaginationOptions;
   }): Promise<Message[]>;
 
+  abstract findByConversationWithPagination(
+    conversationId: string,
+    paginationOptions: IPaginationOptions,
+  ): Promise<Message[]>;
+
   abstract findById(id: Message['id']): Promise<NullableType<Message>>;
 
   abstract findByIds(ids: Message['id'][]): Promise<Message[]>;

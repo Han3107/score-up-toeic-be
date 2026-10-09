@@ -14,6 +14,11 @@ export abstract class ConversationRepository {
     paginationOptions: IPaginationOptions;
   }): Promise<Conversation[]>;
 
+  abstract findByParticipantWithPagination(
+    userId: string,
+    paginationOptions: IPaginationOptions,
+  ): Promise<Conversation[]>;
+
   abstract findById(
     id: Conversation['id'],
   ): Promise<NullableType<Conversation>>;

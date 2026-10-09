@@ -94,6 +94,19 @@ export class MessagesService {
     });
   }
 
+  findByConversationWithPagination(
+    conversationId: string,
+    paginationOptions: IPaginationOptions,
+  ) {
+    return this.messageRepository.findByConversationWithPagination(
+      conversationId,
+      {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+      },
+    );
+  }
+
   findById(id: Message['id']) {
     return this.messageRepository.findById(id);
   }

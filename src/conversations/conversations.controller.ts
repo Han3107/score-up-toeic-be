@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Request,
 } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
@@ -27,6 +28,9 @@ import {
 } from '../utils/dto/infinity-pagination-response.dto';
 import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllConversationsDto } from './dto/find-all-conversations.dto';
+import { Message } from '../messages/domain/message';
+import type { RequestWithUser } from '../utils/types/request-with-user.type';
+import { JwtPayloadType } from '../auth/strategies/types/jwt-payload.type';
 
 @ApiTags('Conversations')
 @ApiBearerAuth()
@@ -51,6 +55,7 @@ export class ConversationsController {
     type: InfinityPaginationResponse(Conversation),
   })
   async findAll(
+    @Request() request: RequestWithUser<JwtPayloadType>,
     @Query() query: FindAllConversationsDto,
   ): Promise<InfinityPaginationResponseDto<Conversation>> {
     const page = query?.page ?? 1;
@@ -60,12 +65,46 @@ export class ConversationsController {
     }
 
     return infinityPagination(
-      await this.conversationsService.findAllWithPagination({
-        paginationOptions: {
+      await this.conversationsService.findByParticipantWithPagination(
+        request.user?.id?.toString(),
+        {
           page,
           limit,
         },
-      }),
+      ),
+      { page, limit },
+    );
+  }
+
+  @Get(':id/messages')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    required: true,
+  })
+  @ApiOkResponse({
+    type: InfinityPaginationResponse(Message),
+  })
+  async findMessages(
+    @Request() request: RequestWithUser<JwtPayloadType>,
+    @Param('id') id: string,
+    @Query() query: FindAllConversationsDto,
+  ): Promise<InfinityPaginationResponseDto<Message>> {
+    const page = query?.page ?? 1;
+    let limit = query?.limit ?? 10;
+    if (limit > 50) {
+      limit = 50;
+    }
+
+    return infinityPagination(
+      await this.conversationsService.findMessagesByConversation(
+        id,
+        request.user?.id?.toString(),
+        {
+          page,
+          limit,
+        },
+      ),
       { page, limit },
     );
   }

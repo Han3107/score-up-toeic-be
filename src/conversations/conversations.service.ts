@@ -9,6 +9,8 @@ import {
   Injectable,
   HttpStatus,
   UnprocessableEntityException,
+  ForbiddenException,
+  NotFoundException,
   forwardRef,
   Inject,
 } from '@nestjs/common';
@@ -89,6 +91,40 @@ export class ConversationsService {
         limit: paginationOptions.limit,
       },
     });
+  }
+
+  findByParticipantWithPagination(
+    userId: string,
+    paginationOptions: IPaginationOptions,
+  ) {
+    return this.conversationRepository.findByParticipantWithPagination(userId, {
+      page: paginationOptions.page,
+      limit: paginationOptions.limit,
+    });
+  }
+
+  async findMessagesByConversation(
+    conversationId: string,
+    userId: string,
+    paginationOptions: IPaginationOptions,
+  ) {
+    const conversation =
+      await this.conversationRepository.findById(conversationId);
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    const isParticipant = conversation.participants?.some(
+      (p) => p.id === userId || p.id?.toString() === userId,
+    );
+    if (!isParticipant) {
+      throw new ForbiddenException('Not a participant');
+    }
+
+    return this.messageService.findByConversationWithPagination(
+      conversationId,
+      paginationOptions,
+    );
   }
 
   findById(id: Conversation['id']) {

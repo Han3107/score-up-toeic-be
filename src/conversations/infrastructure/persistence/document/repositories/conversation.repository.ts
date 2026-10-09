@@ -37,6 +37,21 @@ export class ConversationDocumentRepository implements ConversationRepository {
     );
   }
 
+  async findByParticipantWithPagination(
+    userId: string,
+    paginationOptions: IPaginationOptions,
+  ): Promise<Conversation[]> {
+    const entityObjects = await this.conversationModel
+      .find({ participants: userId } as any)
+      .sort({ updatedAt: -1 })
+      .skip((paginationOptions.page - 1) * paginationOptions.limit)
+      .limit(paginationOptions.limit);
+
+    return entityObjects.map((entityObject) =>
+      ConversationMapper.toDomain(entityObject),
+    );
+  }
+
   async findById(id: Conversation['id']): Promise<NullableType<Conversation>> {
     const entityObject = await this.conversationModel.findById(id);
     return entityObject ? ConversationMapper.toDomain(entityObject) : null;
