@@ -4,7 +4,6 @@ import {
   ClassSerializerInterceptor,
   ValidationPipe,
   VersioningType,
-  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
