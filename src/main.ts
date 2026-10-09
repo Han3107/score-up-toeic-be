@@ -12,6 +12,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { AppModule } from './app.module';
+import { Logger as NestCommonLogger } from '@nestjs/common';
+import { GlobalExceptionFilter } from './utils/global-exception.filter';
 import validationOptions from './utils/validation-options';
 import { AllConfigType } from './config/config.type';
 import { ResolvePromisesInterceptor } from './utils/serializer.interceptor';
@@ -19,6 +21,7 @@ import { ResolvePromisesInterceptor } from './utils/serializer.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
+  app.useGlobalFilters(new GlobalExceptionFilter(new NestCommonLogger()));
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const configService = app.get(ConfigService<AllConfigType>);
 
