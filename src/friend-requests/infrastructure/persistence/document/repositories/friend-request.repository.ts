@@ -89,7 +89,7 @@ export class FriendRequestDocumentRepository implements FriendRequestRepository 
         { sender: user1Id, receiver: user2Id, status: 'accepted' },
         { sender: user2Id, receiver: user1Id, status: 'accepted' },
       ],
-    });
+    } as any);
     return !!request;
   }
 }
