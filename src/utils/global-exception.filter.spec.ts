@@ -42,9 +42,8 @@ describe('GlobalExceptionFilter', () => {
     expect(mockStatus).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
     expect(mockJson).toHaveBeenCalledWith(
       expect.objectContaining({
-        statusCode: HttpStatus.BAD_REQUEST,
         message: 'Test Error',
-        path: '/test',
+        requestId: 'test-req-id',
       }),
     );
   });
