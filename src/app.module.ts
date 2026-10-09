@@ -47,8 +47,20 @@ import { ExamResultsModule } from './exam-results/exam-results.module';
 
 import { LeaderboardsModule } from './leaderboards/leaderboards.module';
 
+import { FriendRequestsModule } from './friend-requests/friend-requests.module';
+
+import { ConversationsModule } from './conversations/conversations.module';
+
+import { MessagesModule } from './messages/messages.module';
+
+import { ChatModule } from './chat/chat.module';
+
 @Module({
   imports: [
+    ChatModule,
+    MessagesModule,
+    ConversationsModule,
+    FriendRequestsModule,
     ExamResultsModule,
     LeaderboardsModule,
     ScheduleModule.forRoot(),
