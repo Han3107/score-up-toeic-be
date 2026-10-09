@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
+  Logger,
 } from '@nestjs/common';
 import ms from 'ms';
 import crypto from 'crypto';
@@ -31,6 +32,8 @@ import { User } from '../users/domain/user';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
@@ -245,7 +248,8 @@ export class AuthService {
       });
 
       userId = jwtData.confirmEmailUserId;
-    } catch {
+    } catch (error) {
+      this.logger.error('Error confirming email', (error as Error).stack);
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
@@ -290,7 +294,8 @@ export class AuthService {
 
       userId = jwtData.confirmEmailUserId;
       newEmail = jwtData.newEmail;
-    } catch {
+    } catch (error) {
+      this.logger.error('Error verifying new email', (error as Error).stack);
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
@@ -373,7 +378,11 @@ export class AuthService {
       } | null>(hash);
 
       userId = jwtData?.forgotUserId;
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Error decoding forgot password token',
+        (error as Error).stack,
+      );
       userId = undefined;
     }
 
@@ -382,7 +391,11 @@ export class AuthService {
     if (userId !== undefined && userId !== null) {
       try {
         user = await this.usersService.findById(userId);
-      } catch {
+      } catch (error) {
+        this.logger.error(
+          'Error finding user for password reset',
+          (error as Error).stack,
+        );
         user = null;
       }
     }
@@ -401,7 +414,11 @@ export class AuthService {
         secret: this.getForgotSecret(user),
         algorithms: ['HS256'],
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Error verifying forgot password token',
+        (error as Error).stack,
+      );
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
