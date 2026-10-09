@@ -82,4 +82,14 @@ export class FriendRequestDocumentRepository implements FriendRequestRepository 
   async remove(id: FriendRequest['id']): Promise<void> {
     await this.friendRequestModel.deleteOne({ _id: id });
   }
+
+  async areFriends(user1Id: string, user2Id: string): Promise<boolean> {
+    const request = await this.friendRequestModel.findOne({
+      $or: [
+        { sender: user1Id, receiver: user2Id, status: 'accepted' },
+        { sender: user2Id, receiver: user1Id, status: 'accepted' },
+      ],
+    });
+    return !!request;
+  }
 }

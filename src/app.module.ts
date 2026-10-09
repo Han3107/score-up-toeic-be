@@ -53,8 +53,11 @@ import { ConversationsModule } from './conversations/conversations.module';
 
 import { MessagesModule } from './messages/messages.module';
 
+import { ChatModule } from './chat/chat.module';
+
 @Module({
   imports: [
+    ChatModule,
     MessagesModule,
     ConversationsModule,
     FriendRequestsModule,

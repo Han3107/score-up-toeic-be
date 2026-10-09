@@ -26,4 +26,6 @@ export abstract class FriendRequestRepository {
   ): Promise<FriendRequest | null>;
 
   abstract remove(id: FriendRequest['id']): Promise<void>;
+
+  abstract areFriends(user1Id: string, user2Id: string): Promise<boolean>;
 }

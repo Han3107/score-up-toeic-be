@@ -94,6 +94,10 @@ export class FriendRequestsService {
     return this.friendRequestRepository.findByIds(ids);
   }
 
+  async areFriends(user1Id: string, user2Id: string): Promise<boolean> {
+    return this.friendRequestRepository.areFriends(user1Id, user2Id);
+  }
+
   async accept(id: string, receiverId: string) {
     const request = await this.friendRequestRepository.findById(id);
     if (
