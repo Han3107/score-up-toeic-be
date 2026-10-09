@@ -12,6 +12,7 @@ import { UpdateFriendRequestDto } from './dto/update-friend-request.dto';
 import { FriendRequestRepository } from './infrastructure/persistence/friend-request.repository';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { FriendRequest } from './domain/friend-request';
+import { ConversationRepository } from '../conversations/infrastructure/persistence/conversation.repository';
 
 @Injectable()
 export class FriendRequestsService {
@@ -20,6 +21,7 @@ export class FriendRequestsService {
 
     // Dependencies here
     private readonly friendRequestRepository: FriendRequestRepository,
+    private readonly conversationRepository: ConversationRepository,
   ) {}
 
   async create(createFriendRequestDto: CreateFriendRequestDto) {
@@ -90,6 +92,28 @@ export class FriendRequestsService {
 
   findByIds(ids: FriendRequest['id'][]) {
     return this.friendRequestRepository.findByIds(ids);
+  }
+
+  async accept(id: string, receiverId: string) {
+    const request = await this.friendRequestRepository.findById(id);
+    if (
+      !request ||
+      request.status !== 'pending' ||
+      request.receiver?.id !== receiverId
+    ) {
+      throw new UnprocessableEntityException('Invalid friend request');
+    }
+
+    const updated = await this.friendRequestRepository.update(id, {
+      status: 'accepted',
+    });
+    if (updated && request.sender && request.receiver) {
+      await this.conversationRepository.create({
+        participants: [request.sender, request.receiver],
+      });
+    }
+
+    return updated;
   }
 
   async update(

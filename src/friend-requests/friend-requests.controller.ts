@@ -1,4 +1,5 @@
 import {
+  Request,
   Controller,
   Get,
   Post,
@@ -81,6 +82,19 @@ export class FriendRequestsController {
   })
   findById(@Param('id') id: string) {
     return this.friendRequestsService.findById(id);
+  }
+
+  @Post(':id/accept')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    required: true,
+  })
+  @ApiOkResponse({
+    type: FriendRequest,
+  })
+  accept(@Param('id') id: string, @Request() request: any) {
+    return this.friendRequestsService.accept(id, request.user?.id);
   }
 
   @Patch(':id')

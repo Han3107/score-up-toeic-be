@@ -6,11 +6,12 @@ import {
 import { FriendRequestsService } from './friend-requests.service';
 import { FriendRequestsController } from './friend-requests.controller';
 import { DocumentFriendRequestPersistenceModule } from './infrastructure/persistence/document/document-persistence.module';
+import { DocumentConversationPersistenceModule } from '../conversations/infrastructure/persistence/document/document-persistence.module';
 
 @Module({
   imports: [
     UsersModule,
-
+    DocumentConversationPersistenceModule,
     // do not remove this comment
     DocumentFriendRequestPersistenceModule,
   ],
