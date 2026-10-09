@@ -9,4 +9,5 @@ export type AppConfig = {
   apiPrefix: string;
   fallbackLanguage: string;
   headerLanguage: string;
+  logLevel: string;
 };
